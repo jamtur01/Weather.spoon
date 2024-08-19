@@ -10,9 +10,10 @@ obj.homepage = "https://github.com/jamtur01/Weather.spoon"
 
 -- Default settings
 obj.apiKey = hs.settings.get("WeatherSpoon_apiKey") or "API_KEY"
-obj.latitude = hs.settings.get("WeatherSpoon_latitude") or "40.7128"  -- Default: Brooklyn, NY
-obj.longitude = hs.settings.get("WeatherSpoon_longitude") or "-74.0060" -- Default: Brooklyn, NY
+obj.cityName = hs.settings.get("WeatherSpoon_cityName") or "Brooklyn"  -- Default city
 obj.updateInterval = hs.settings.get("WeatherSpoon_updateInterval") or 3600  -- Default: every hour
+obj.latitude = nil  -- Will be dynamically set
+obj.longitude = nil -- Will be dynamically set
 
 obj.weaEmoji = {
     Thunderstorm = '⛈',
@@ -38,8 +39,7 @@ function obj:init()
     self.menubar = hs.menubar.new()
     self.menubar:setTitle('⌛')
     self.menuData = {}
-    self:updateMenubar()
-    self:start()
+    self:getCoordinates(self.cityName)
 end
 
 -- Update the menubar icon and menu
@@ -48,22 +48,53 @@ function obj:updateMenubar()
     self.menubar:setMenu(self.menuData)
 end
 
+-- Get coordinates from the city name
+function obj:getCoordinates(cityName)
+    local geoApi = string.format("http://api.openweathermap.org/geo/1.0/direct?q=%s&limit=1&appid=%s",
+        hs.http.encodeForQuery(cityName), self.apiKey)
+    
+    hs.http.doAsyncRequest(geoApi, "GET", nil, nil, function(code, body, _)
+        if code ~= 200 then
+            print('WeatherSpoon geocode error: ' .. code)
+            return
+        end
+
+        local locationData = hs.json.decode(body)
+        if #locationData == 0 then
+            print('WeatherSpoon: No location data found for ' .. cityName)
+            return
+        end
+
+        -- Extract latitude and longitude from the geocode response
+        self.latitude = locationData[1].lat
+        self.longitude = locationData[1].lon
+
+        -- Once the coordinates are set, start the weather retrieval process
+        self:start()
+    end)
+end
+
 -- Fetch and display the weather
 function obj:getWeather()
+    if not self.latitude or not self.longitude then
+        print('WeatherSpoon: Coordinates not set.')
+        return
+    end
+
     local urlApi = string.format("https://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&exclude=minutely,hourly,alerts&appid=%s&units=metric", 
         self.latitude, self.longitude, self.apiKey)
-    
+
     hs.http.doAsyncRequest(urlApi, "GET", nil, nil, function(code, body, _)
         if code ~= 200 then
             print('WeatherSpoon error: ' .. code)
             return
         end
+
         local rawjson = hs.json.decode(body)
         local current = rawjson.current
         local weather = current.weather[1].main
         local temp = current.temp
         local humidity = current.humidity
-        local city = "Brooklyn"  -- Change this to your desired city name
         local rain_chance = rawjson.daily[1].pop * 100  -- Probability of precipitation as a percentage
 
         -- Update the menubar title with the emoji and temperature
@@ -71,7 +102,7 @@ function obj:getWeather()
 
         self.menuData = {}
         -- Titles in the popup menu without the emoji and wind speed, but with rain chance
-        local titlestr = string.format("%s 🌡️%.1f°C 💧%s%% 🌧️%s%%", city, temp, humidity, rain_chance)
+        local titlestr = string.format("%s 🌡️%.1f°C 💧%s%% 🌧️%s%%", self.cityName, temp, humidity, rain_chance)
         local item = { title = titlestr }
         table.insert(self.menuData, item)
         table.insert(self.menuData, {title = '-'})
@@ -92,19 +123,17 @@ function obj:stop()
 end
 
 -- Configure the Spoon
-function obj:configure(apiKey, latitude, longitude, updateInterval)
+function obj:configure(apiKey, cityName, updateInterval)
     self.apiKey = apiKey or self.apiKey
-    self.latitude = latitude or self.latitude
-    self.longitude = longitude or self.longitude
+    self.cityName = cityName or self.cityName
     self.updateInterval = updateInterval or self.updateInterval
 
     hs.settings.set("WeatherSpoon_apiKey", self.apiKey)
-    hs.settings.set("WeatherSpoon_latitude", self.latitude)
-    hs.settings.set("WeatherSpoon_longitude", self.longitude)
+    hs.settings.set("WeatherSpoon_cityName", self.cityName)
     hs.settings.set("WeatherSpoon_updateInterval", self.updateInterval)
 
     self:stop()
-    self:start()
+    self:getCoordinates(self.cityName)  -- Re-fetch the coordinates and start again
 end
 
 return obj
