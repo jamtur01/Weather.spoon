@@ -15,6 +15,8 @@ obj.updateInterval = hs.settings.get("WeatherSpoon_updateInterval") or 3600  -- 
 obj.latitude = nil  -- Will be dynamically set
 obj.longitude = nil -- Will be dynamically set
 
+obj.logger = hs.logger.new('Weatherspoon', 'info')
+
 obj.weaEmoji = {
     Thunderstorm = '⛈',
     Drizzle = '🌦',
@@ -33,6 +35,19 @@ obj.weaEmoji = {
     Clouds = '☁️',
     default = ''
 }
+
+-- Logging helpers
+function obj:logDebug(message)
+    self.logger.d(message)
+end
+
+function obj:logInfo(message)
+    self.logger.i(message)
+end
+
+function obj:logError(message)
+    self.logger.e(message)
+end
 
 -- Initialize the Spoon
 function obj:init()
@@ -55,13 +70,13 @@ function obj:getCoordinates(cityName)
     
     hs.http.doAsyncRequest(geoApi, "GET", nil, nil, function(code, body, _)
         if code ~= 200 then
-            print('WeatherSpoon geocode error: ' .. code)
+            self:logInfo('WeatherSpoon geocode error: ' .. code)
             return
         end
 
         local locationData = hs.json.decode(body)
         if #locationData == 0 then
-            print('WeatherSpoon: No location data found for ' .. cityName)
+            self:logInfo('WeatherSpoon: No location data found for ' .. cityName)
             return
         end
 
@@ -77,7 +92,7 @@ end
 -- Fetch and display the weather
 function obj:getWeather()
     if not self.latitude or not self.longitude then
-        print('WeatherSpoon: Coordinates not set.')
+        self:logInfo('WeatherSpoon: Coordinates not set.')
         return
     end
 
@@ -86,7 +101,7 @@ function obj:getWeather()
 
     hs.http.doAsyncRequest(urlApi, "GET", nil, nil, function(code, body, _)
         if code ~= 200 then
-            print('WeatherSpoon error: ' .. code)
+            self:logInfo('WeatherSpoon error: ' .. code)
             return
         end
 
