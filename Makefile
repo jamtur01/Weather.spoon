@@ -3,19 +3,25 @@ SHORT_GIT_SHA=$(shell git rev-parse --short HEAD)
 BASE_TAG=v$(OBJ_VERSION)
 TAG_FILE=.tag
 
+# Ensure auto-changelog is installed
+install_auto_changelog:
+	@if ! command -v auto-changelog &> /dev/null; then \
+        echo "auto-changelog not found. Installing..."; \
+        npm install -g auto-changelog; \
+    fi
+
 # Release target
-release: clean_changelog changelog check_tag_exists create_tag push_tag
+release: install_auto_changelog clean_changelog changelog check_tag_exists create_tag push_tag
 
 # Clean the old changelog file
 clean_changelog:
 	@echo "Cleaning old CHANGELOG.md"
 	@rm -f CHANGELOG.md
 
-# Generate a simple changelog from git log
+# Generate a changelog using auto-changelog
 changelog:
 	@echo "Generating CHANGELOG.md"
-	@echo "## Version $(BASE_TAG)" > CHANGELOG.md
-	@git log --pretty=format:"- %s" $(shell git describe --tags --abbrev=0)..HEAD >> CHANGELOG.md
+	@auto-changelog --tag-prefix "v" --output CHANGELOG.md
 	@echo "Changelog generated."
 	@git add CHANGELOG.md
 	@git commit -m "Update CHANGELOG.md for release $(BASE_TAG)"
