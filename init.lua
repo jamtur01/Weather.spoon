@@ -3,7 +3,7 @@ obj.__index = obj
 
 -- Metadata
 obj.name = "Weather"
-obj.version = "1.1"
+obj.version = "1.2"
 obj.author = "James Turnbull <james@lovedthanlost.net>"
 obj.license = "MIT"
 obj.homepage = "https://github.com/jamtur01/Weather.spoon"
@@ -14,7 +14,6 @@ obj.cityName = hs.settings.get("Weather_cityName") or "Brooklyn"
 obj.updateInterval = hs.settings.get("Weather_updateInterval") or 3600
 obj.latitude = nil
 obj.longitude = nil
-
 obj.logger = hs.logger.new('Weather', 'info')
 
 obj.weatherEmojis = {
@@ -24,9 +23,13 @@ obj.weatherEmojis = {
     Tornado = '🌪', Clear = '☀️', Clouds = '☁️', default = '🌡️'
 }
 
--- Helper functions
+-- Helper function: use obj.logger directly
 local function logMessage(level, message)
-    obj.logger[level](message)
+    if obj.logger and obj.logger[level] then
+        obj.logger[level](message)
+    else
+        print(string.format("[%s] %s", level, message))
+    end
 end
 
 -- Initialize the Spoon
@@ -61,6 +64,7 @@ function obj:getCoordinates()
         end
 
         self.latitude, self.longitude = locationData[1].lat, locationData[1].lon
+
         self:start()
     end)
 end
@@ -95,11 +99,22 @@ function obj:getWeather()
 
         self.menubar:setTitle(string.format("%s %.1f°C", self.weatherEmojis[weather] or self.weatherEmojis.default, temp))
 
-        self.menuData = {
-            {title = string.format("%s 🌡️%.1f°C 💧%d%% 🌧️%d%%", self.cityName, temp, humidity, rainChance)},
+        local menuItems = {
+            {
+                title = string.format("%s 🌡️%.1f°C 💧%d%% 🌧️%d%%", self.cityName, temp, humidity, rainChance),
+                fn = function()
+                    if self.latitude and self.longitude then
+                        hs.urlevent.openURL(string.format("https://openweathermap.org/?lat=%s&lon=%s", self.latitude, self.longitude))
+                    else
+                        hs.urlevent.openURL("https://openweathermap.org")
+                    end
+                end,
+                tooltip = "Click to open detailed weather info"
+            },
             {title = '-'}
         }
 
+        self.menuData = menuItems
         self:updateMenubar()
     end)
 end
