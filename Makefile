@@ -28,7 +28,8 @@ commit_version_change:
 # Generate a changelog using auto-changelog
 changelog:
 	@echo "Generating CHANGELOG.md"
-	@auto-changelog --tag-prefix "v" --output CHANGELOG.md --unreleased
+	@new_version=$$(cat $(TAG_FILE)); \
+	auto-changelog --tag-prefix "v" --output CHANGELOG.md --unreleased --future-release v$$new_version
 	@echo "CHANGELOG.md generated."
 	@git add CHANGELOG.md
 	@git commit -m "Update CHANGELOG.md for v$$(cat $(TAG_FILE))"
@@ -42,7 +43,7 @@ create_tag:
 # Push the code and tag
 push_changes:
 	@git push origin main
-	@git push origin --tags v$$(cat $(TAG_FILE))
+	@git push origin --tags
 	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
