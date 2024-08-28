@@ -29,7 +29,7 @@ commit_version_change:
 changelog:
 	@echo "Generating CHANGELOG.md"
 	@new_version=$$(cat $(TAG_FILE)); \
-	auto-changelog --tag-prefix "v" --output CHANGELOG.md --unreleased --future-release v$$new_version
+	auto-changelog --output CHANGELOG.md --latest-version v$$new_version --unreleased --tag-prefix v
 	@echo "CHANGELOG.md generated."
 	@git add CHANGELOG.md
 	@git commit -m "Update CHANGELOG.md for v$$(cat $(TAG_FILE))"
