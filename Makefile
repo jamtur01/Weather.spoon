@@ -42,7 +42,7 @@ changelog:
 # Push the code and tag
 push_tag:
 	@git push origin main
-	@git push origin v$$(cat $(TAG_FILE))
+	@git push origin $$(cat $(TAG_FILE))
 	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
