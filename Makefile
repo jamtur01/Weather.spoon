@@ -15,11 +15,11 @@ increment_version:
 	@echo "Current version: $(OBJ_VERSION)"
 	@new_version=$$(echo $(OBJ_VERSION) | awk -F. '{$$NF = $$NF + 1;} 1' | sed 's/ /./g'); \
 	echo "Incrementing version to: $$new_version"; \
-	sed -i.bak 's/obj.version = "$(OBJ_VERSION)"/obj.version = "$$new_version"/' init.lua; \
+	sed -i.bak "s/obj.version = \"$(OBJ_VERSION)\"/obj.version = \"$$new_version\"/" init.lua; \
 	rm -f init.lua.bak; \
 	echo "Version incremented to $$new_version"; \
 	echo "$$new_version" > $(TAG_FILE)
-
+	
 # Commit the version change
 commit_version_change:
 	@git add init.lua
