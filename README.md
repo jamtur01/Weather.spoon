@@ -1,6 +1,6 @@
 # WeatherSpoon
 
-**WeatherSpoon** is a Hammerspoon Spoon that displays the current weather in the menu bar, updating periodically.
+**WeatherSpoon** is a Hammerspoon Spoon that displays the current weather in the menu bar, updating periodically. You can click on the weather to see more details, such as the temperature, humidity, and wind speed.
 
 ## Installation
 
