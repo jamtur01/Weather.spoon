@@ -45,7 +45,7 @@ push_tag:
 	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
-release: install_auto_changelog increment_version changelog create_tag commit_version_change push_tag clean
+release: install_auto_changelog increment_version commit_version_change create_tag changelog push_tag clean
 
 # Clean up the temporary tag file
 clean:
