@@ -6,9 +6,9 @@ TAG_FILE=.tag
 # Ensure auto-changelog is installed
 install_auto_changelog:
 	@if ! command -v auto-changelog &> /dev/null; then \
-        echo "auto-changelog not found. Installing..."; \
-        npm install -g auto-changelog; \
-    fi
+		echo "auto-changelog not found. Installing..."; \
+		npm install -g auto-changelog; \
+	fi
 
 # Increment the version in init.lua
 increment_version:
@@ -25,27 +25,28 @@ commit_version_change:
 	@git add init.lua
 	@git commit -m "Bump version to v$$(cat $(TAG_FILE))"
 
+# Generate a changelog using auto-changelog
+changelog:
+	@echo "Generating CHANGELOG.md"
+	@auto-changelog --tag-prefix "v" --output CHANGELOG.md --unreleased
+	@echo "CHANGELOG.md generated."
+	@git add CHANGELOG.md
+	@git commit -m "Update CHANGELOG.md for v$$(cat $(TAG_FILE))"
+
 # Create a new tag based on the incremented version
 create_tag:
 	@new_version=$$(cat $(TAG_FILE)); \
 	git tag -a "v$$new_version" -m "Release v$$new_version"
 	@echo "Tag created: v$$new_version"
 
-# Generate a changelog using auto-changelog
-changelog:
-	@echo "Generating CHANGELOG.md"
-	@auto-changelog --tag-prefix "v" --output CHANGELOG.md
-	@echo "CHANGELOG.md generated."
-	@git add CHANGELOG.md
-
 # Push the code and tag
-push_tag:
+push_changes:
 	@git push origin main
 	@git push origin --tags v$$(cat $(TAG_FILE))
 	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
-release: install_auto_changelog increment_version commit_version_change create_tag changelog push_tag clean
+release: install_auto_changelog increment_version commit_version_change changelog create_tag push_changes clean
 
 # Clean up the temporary tag file
 clean:
