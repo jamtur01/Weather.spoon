@@ -16,9 +16,9 @@ increment_version:
 	@new_version=$$(echo $(OBJ_VERSION) | awk -F. '{$$NF = $$NF + 1;} 1' | sed 's/ /./g'); \
 	echo "Incrementing version to: $$new_version"; \
 	sed -i.bak 's/obj.version = "$(OBJ_VERSION)"/obj.version = "$$new_version"/' init.lua; \
-	echo "Version incremented to $$new_version"
-	@echo "$$new_version" > $(TAG_FILE)
-	@rm -f init.lua.bak
+	rm -f init.lua.bak; \
+	echo "Version incremented to $$new_version"; \
+	echo "$$new_version" > $(TAG_FILE)
 
 # Commit the version change
 commit_version_change:
@@ -37,7 +37,7 @@ changelog:
 	@auto-changelog --tag-prefix "v" --output CHANGELOG.md
 	@echo "Changelog generated."
 	@git add CHANGELOG.md
-	@git commit -m "Update CHANGELOG.md for release v$$(cat $(TAG_FILE))"
+	@git commit -m "Update CHANGELOG.md for release v$$(cat $(TAG_FILE))" || echo "No changes to commit for the changelog."
 
 # Push the code and tag
 push_tag:
