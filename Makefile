@@ -35,18 +35,17 @@ create_tag:
 changelog:
 	@echo "Generating CHANGELOG.md"
 	@auto-changelog --tag-prefix "v" --output CHANGELOG.md
-	@echo "Changelog generated."
+	@echo "CHANGELOG.md generated."
 	@git add CHANGELOG.md
-	@git commit -m "Update CHANGELOG.md for release v$$(cat $(TAG_FILE))" || echo "No changes to commit for the changelog."
 
 # Push the code and tag
 push_tag:
 	@git push origin main
-	@git push origin v$$(cat $(TAG_FILE))
+	@git push origin --tags v$$(cat $(TAG_FILE))
 	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
-release: install_auto_changelog increment_version commit_version_change create_tag changelog push_tag clean
+release: install_auto_changelog increment_version changelog create_tag commit_version_change push_tag clean
 
 # Clean up the temporary tag file
 clean:
