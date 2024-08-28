@@ -32,7 +32,7 @@ jobs:
       - name: Build the Spoon Zip
         run: |
           mkdir -p dist
-          zip -r "dist/${{ steps.spoon_name.outputs.spoon_name }}.spoon.zip" . -x ".git*" ".github*" "dist/*"
+          zip -r "dist/${{ steps.spoon_name.outputs.spoon_name }}.spoon.zip" . -x ".git*" ".github*" "dist/*" "Makefile"
         shell: bash
 
       - name: Upload Spoon Artifact
