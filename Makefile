@@ -17,19 +17,19 @@ increment_version:
 	echo "Incrementing version to: $$new_version"; \
 	sed -i.bak 's/obj.version = "$(OBJ_VERSION)"/obj.version = "$$new_version"/' init.lua; \
 	echo "Version incremented to $$new_version"
+	@echo "$$new_version" > $(TAG_FILE)
 	@rm -f init.lua.bak
 
 # Commit the version change
 commit_version_change:
 	@git add init.lua
-	@git commit -m "Bump version to $$new_version"
+	@git commit -m "Bump version to v$$(cat $(TAG_FILE))"
 
 # Create a new tag based on the incremented version
 create_tag:
-	@new_version=$$(grep -Eo 'obj.version\s*=\s*"[^"]+"' init.lua | cut -d'"' -f2); \
+	@new_version=$$(cat $(TAG_FILE)); \
 	git tag -a "v$$new_version" -m "Release v$$new_version"
 	@echo "Tag created: v$$new_version"
-	@echo "v$$new_version" > $(TAG_FILE)
 
 # Generate a changelog using auto-changelog
 changelog:
@@ -43,7 +43,7 @@ changelog:
 push_tag:
 	@git push origin main
 	@git push origin $$(cat $(TAG_FILE))
-	@echo "Code and tag pushed to GitHub: $$(cat $(TAG_FILE))"
+	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
 release: install_auto_changelog increment_version commit_version_change create_tag changelog push_tag clean

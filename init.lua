@@ -3,7 +3,7 @@ obj.__index = obj
 
 -- Metadata
 obj.name = "Weather"
-obj.version = "$new_version"
+obj.version = "1.2.0"
 obj.author = "James Turnbull <james@lovedthanlost.net>"
 obj.license = "MIT"
 obj.homepage = "https://github.com/jamtur01/Weather.spoon"
