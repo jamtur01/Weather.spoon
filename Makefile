@@ -37,8 +37,8 @@ changelog:
 # Create a new tag based on the incremented version
 create_tag:
 	@new_version=$$(cat $(TAG_FILE)); \
-	git tag -a "v$$new_version" -m "Release v$$new_version"
-	@echo "Tag created: v$$new_version"
+	git tag -a "v$$new_version" -m "Release v$$new_version"; \
+	echo "Tag created: v$$new_version"
 
 # Push the code and tag
 push_changes:
