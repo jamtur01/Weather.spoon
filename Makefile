@@ -11,20 +11,12 @@ install_auto_changelog:
     fi
 
 # Release target
-release: install_auto_changelog clean_changelog changelog check_tag_exists create_tag push_tag
+release: install_auto_changelog clean_changelog check_tag_exists create_tag changelog push_tag
 
 # Clean the old changelog file
 clean_changelog:
 	@echo "Cleaning old CHANGELOG.md"
 	@rm -f CHANGELOG.md
-
-# Generate a changelog using auto-changelog
-changelog:
-	@echo "Generating CHANGELOG.md"
-	@auto-changelog --tag-prefix "v" --output CHANGELOG.md
-	@echo "Changelog generated."
-	@git add CHANGELOG.md
-	@git commit -m "Update CHANGELOG.md for release $(BASE_TAG)"
 
 # Check if the base tag exists, and update TAG if necessary
 check_tag_exists:
@@ -41,6 +33,14 @@ create_tag:
 	@TAG=$$(cat $(TAG_FILE)); \
 	git tag -a $$TAG -m "Release $$TAG"; \
 	echo "Tag created: $$TAG"
+
+# Generate a changelog using auto-changelog
+changelog:
+	@echo "Generating CHANGELOG.md"
+	@auto-changelog --tag-prefix "v" --output CHANGELOG.md
+	@echo "Changelog generated."
+	@git add CHANGELOG.md
+	@git commit -m "Update CHANGELOG.md for release $(BASE_TAG)"
 
 # Push the code and tag
 push_tag:
