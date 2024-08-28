@@ -1,6 +1,6 @@
+# Variables to track current version and short git SHA
 OBJ_VERSION=$(shell grep -Eo 'obj.version\s*=\s*"[^"]+"' init.lua | cut -d'"' -f2)
 SHORT_GIT_SHA=$(shell git rev-parse --short HEAD)
-BASE_TAG=v$(OBJ_VERSION)
 TAG_FILE=.tag
 
 # Ensure auto-changelog is installed
@@ -10,48 +10,43 @@ install_auto_changelog:
         npm install -g auto-changelog; \
     fi
 
-# Release target
-release: install_auto_changelog clean_changelog check_tag_exists create_tag generate_changelog push_tag
+# Increment the version in init.lua
+increment_version:
+	@echo "Current version: $(OBJ_VERSION)"
+	@new_version=$$(echo $(OBJ_VERSION) | awk -F. '{$$NF = $$NF + 1;} 1' | sed 's/ /./g'); \
+	echo "Incrementing version to: $$new_version"; \
+	sed -i.bak 's/obj.version = "$(OBJ_VERSION)"/obj.version = "$$new_version"/' init.lua; \
+	echo "Version incremented to $$new_version"
+	@rm -f init.lua.bak
 
-# Clean the old changelog file
-clean_changelog:
-	@echo "Cleaning old CHANGELOG.md"
-	@rm -f CHANGELOG.md
+# Commit the version change
+commit_version_change:
+	@git add init.lua
+	@git commit -m "Bump version to $$new_version"
 
-# Check if the base tag exists, and update TAG if necessary
-check_tag_exists:
-	@if git rev-parse "$(BASE_TAG)" >/dev/null 2>&1; then \
-        echo "Tag $(BASE_TAG) already exists, updating tag to include SHA"; \
-        echo "$(BASE_TAG)-$(SHORT_GIT_SHA)" > $(TAG_FILE); \
-	else \
-        echo "Creating new tag $(BASE_TAG)"; \
-        echo "$(BASE_TAG)" > $(TAG_FILE); \
-	fi
-
-# Create a git tag with the updated TAG
+# Create a new tag based on the incremented version
 create_tag:
-	@TAG=$$(cat $(TAG_FILE)); \
-	git tag -a $$TAG -m "Release $$TAG"; \
-	echo "Tag created: $$TAG"
+	@new_version=$$(grep -Eo 'obj.version\s*=\s*"[^"]+"' init.lua | cut -d'"' -f2); \
+	git tag -a "v$$new_version" -m "Release v$$new_version"
+	@echo "Tag created: v$$new_version"
+	@echo "v$$new_version" > $(TAG_FILE)
 
 # Generate a changelog using auto-changelog
-generate_changelog:
+changelog:
 	@echo "Generating CHANGELOG.md"
 	@auto-changelog --tag-prefix "v" --output CHANGELOG.md
 	@echo "Changelog generated."
 	@git add CHANGELOG.md
-	@if ! git diff --cached --quiet; then \
-        git commit -m "Update CHANGELOG.md for release $(BASE_TAG)"; \
-    else \
-        echo "No changes to commit for the changelog."; \
-    fi
+	@git commit -m "Update CHANGELOG.md for release v$$(cat $(TAG_FILE))"
 
 # Push the code and tag
 push_tag:
-	@TAG=$$(cat $(TAG_FILE)); \
-	git push origin main; \
-	git push origin $$TAG; \
-	echo "Code and tag pushed to GitHub: $$TAG"
+	@git push origin main
+	@git push origin $$(cat $(TAG_FILE))
+	@echo "Code and tag pushed to GitHub: $$(cat $(TAG_FILE))"
+
+# Release target
+release: install_auto_changelog increment_version commit_version_change create_tag changelog push_tag clean
 
 # Clean up the temporary tag file
 clean:
