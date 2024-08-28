@@ -19,7 +19,7 @@ increment_version:
 	rm -f init.lua.bak; \
 	echo "Version incremented to $$new_version"; \
 	echo "$$new_version" > $(TAG_FILE)
-	
+
 # Commit the version change
 commit_version_change:
 	@git add init.lua
@@ -42,7 +42,7 @@ changelog:
 # Push the code and tag
 push_tag:
 	@git push origin main
-	@git push origin $$(cat $(TAG_FILE))
+	@git push origin v$$(cat $(TAG_FILE))
 	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
