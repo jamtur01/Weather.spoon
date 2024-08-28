@@ -28,8 +28,8 @@ commit_version_change:
 # Create a new tag based on the incremented version
 create_tag:
 	@new_version=$$(cat $(TAG_FILE)); \
-	git tag -a "v$$new_version" -m "Release v$$new_version"; \
-	echo "Tag created: v$$new_version"
+	git tag -a "v$$new_version" -m "Release v$$new_version"
+	@echo "Tag created: v$$new_version"
 
 # Generate a changelog using auto-changelog
 changelog:
@@ -42,7 +42,7 @@ changelog:
 # Push the code and tag
 push_tag:
 	@git push origin main
-	@git push origin "v$$(cat $(TAG_FILE))"
+	@git push origin v$$(cat $(TAG_FILE))
 	@echo "Code and tag pushed to GitHub: v$$(cat $(TAG_FILE))"
 
 # Release target
