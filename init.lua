@@ -9,7 +9,7 @@ obj.license = "MIT"
 obj.homepage = "https://github.com/jamtur01/Weather.spoon"
 
 -- Default settings
-obj.cityName = hs.settings.get("Weather_cityName") or "Brooklyn+USA"
+obj.cityName = hs.settings.get("Weather_cityName") or "Brooklyn USA"
 obj.updateInterval = hs.settings.get("Weather_updateInterval") or 3600
 obj.logger = hs.logger.new('Weather', 'info')
 
@@ -33,6 +33,7 @@ end
 function obj:init()
     self.menubar = hs.menubar.new()
     self.menubar:setTitle('⌛')
+    self.menubar:setTooltip('Weather Info')
     self.menuData = {}
     self:start()
 end
