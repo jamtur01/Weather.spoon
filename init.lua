@@ -103,7 +103,6 @@ end
 
 -- Update the menubar
 function obj:updateMenubar()
-    self.menubar:setTooltip("Weather Info")
     self.menubar:setMenu(self.menuData)
 end
 
@@ -133,7 +132,8 @@ function obj:getWeather()
         local tempEmoji = self:getTempEmoji(temp)
 
         self.menubar:setTitle(string.format("%s %.1f°C",  weatherEmoji, temp))
-
+        self.menubar:setTooltip(weather .. " " .. tempEmoji .. " " .. temp .. "°C")
+        
         local menuItems = {
             {
                 title = string.format("%s %s %.1f°C (Feels like %.1f°C) 💦 %d%% ☔ %d%%", self.cityName, tempEmoji, temp, feelsLike, humidity, chanceofRain),
