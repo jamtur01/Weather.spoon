@@ -1,3 +1,6 @@
+-- Weather.spoon
+-- A Hammerspoon Spoon to display current weather information based on macOS location.
+
 local obj = {}
 obj.__index = obj
 
@@ -13,6 +16,7 @@ obj.cityName = hs.settings.get("Weather_cityName") or "Brooklyn USA"
 obj.updateInterval = hs.settings.get("Weather_updateInterval") or 3600
 obj.logger = hs.logger.new('Weather', 'info')
 
+-- Weather Emojis
 obj.weatherEmojis = {
     Clear = '☀️',                                         -- Clear
     Sunny = '🌞',                                         -- Sunny
@@ -64,6 +68,7 @@ obj.weatherEmojis = {
     default = '🌡️'                                       -- Default
 }
 
+-- Temperature Emojis
 obj.tempEmojis = {
     {threshold = 35, emoji = '🔥'},    -- Very hot
     {threshold = 25, emoji = '🌞'},    -- Hot
@@ -83,7 +88,6 @@ function obj:getTempEmoji(temp)
     return self.tempEmojis.default
 end
 
--- Helper function: use obj.logger directly
 local function logMessage(level, message)
     if obj.logger and obj.logger[level] then
         obj.logger[level](message)
@@ -92,33 +96,89 @@ local function logMessage(level, message)
     end
 end
 
--- Initialize the Spoon
 function obj:init()
     self.menubar = hs.menubar.new()
-    self.menubar:setTitle('⌛')
-    self.menubar:setTooltip('Weather Info')
+    if self.menubar then
+        self.menubar:setTitle('⌛ Loading...')
+        self.menubar:setTooltip('Weather Info - Waiting for location...')
+    end
     self.menuData = {}
+    
+    self.locationTag = "WeatherLocationCallback"
+    hs.location.register(self.locationTag, function(location)
+        if location and location.horizontalAccuracy >= 0 then
+            self.currentLocation = location
+            self:getWeather()
+        else
+            logMessage('error', 'Received invalid location data')
+        end
+    end)
+    
+    hs.location.start()
+    
+    self.locationRetryCount = 0
+    self.locationMaxRetries = 5
+    self.locationTimeout = hs.timer.doEvery(10, function()
+        self.locationRetryCount = self.locationRetryCount + 1
+        if not self.currentLocation then
+            if self.locationRetryCount < self.locationMaxRetries then
+                logMessage('info', 'Retrying to fetch location...')
+            else
+                logMessage('error', 'Max retries reached, using cityName instead')
+                self:getWeather()
+                self.locationTimeout:stop()
+            end
+        else
+            self.locationTimeout:stop()
+        end
+    end)
+    
     self:start()
 end
 
--- Update the menubar
 function obj:updateMenubar()
-    self.menubar:setMenu(self.menuData)
+    if self.menubar then
+        self.menubar:setMenu(self.menuData)
+    end
 end
 
--- Fetch and display the weather (with forecast included)
 function obj:getWeather()
-    local urlApi = string.format("https://wttr.in/%s?format=j1", hs.http.encodeForQuery(self.cityName))
+    local urlApi
+    local isUsingLocation = false
+    local latitude, longitude
+    
+    if self.currentLocation then
+        latitude = string.format("%.2f", self.currentLocation.latitude)
+        longitude = string.format("%.2f", self.currentLocation.longitude)
+        urlApi = string.format("https://wttr.in/%s,%s?format=j1", latitude, longitude)
+        isUsingLocation = true
+    else
+        logMessage('error', 'Current location not available, using cityName instead')
+        self.cityName = self.cityName or "Brooklyn USA"
+        urlApi = string.format("https://wttr.in/%s?format=j1", hs.http.encodeForQuery(self.cityName))
+    end
+
+    if self.menubar then
+        self.menubar:setTitle('⌛ Fetching...')
+    end
 
     hs.http.asyncGet(urlApi, nil, function(code, body, _)
         if code ~= 200 then
             logMessage('error', string.format('Weather API error: %d', code))
+            if self.menubar then
+                self.menubar:setTitle('⚠️ Error')
+                self.menubar:setTooltip('Weather API error')
+            end
             return
         end
 
         local data = hs.json.decode(body)
         if not data or not data.current_condition or #data.current_condition == 0 then
             logMessage('error', 'Weather: Invalid data received')
+            if self.menubar then
+                self.menubar:setTitle('⚠️ Invalid Data')
+                self.menubar:setTooltip('Received invalid weather data')
+            end
             return
         end
 
@@ -131,14 +191,28 @@ function obj:getWeather()
         local weatherEmoji = self.weatherEmojis[weather] or self.weatherEmojis.default
         local tempEmoji = self:getTempEmoji(temp)
 
-        self.menubar:setTitle(string.format("%s %.1f°C",  weatherEmoji, temp))
-        self.menubar:setTooltip(weather .. " " .. tempEmoji .. " " .. temp .. "°C")
-        
+        local areaName = data.nearest_area and
+                         data.nearest_area[1] and
+                         data.nearest_area[1].areaName and
+                         data.nearest_area[1].areaName[1] and
+                         data.nearest_area[1].areaName[1].value or
+                         self.cityName
+
+        if self.menubar then
+            self.menubar:setTitle(string.format("%s %.1f°C", weatherEmoji, temp))
+            self.menubar:setTooltip(string.format("%s %s %.1f°C", weather, tempEmoji, temp))
+        end
+
         local menuItems = {
             {
-                title = string.format("%s %s %.1f°C (Feels like %.1f°C) 💦 %d%% ☔ %d%%", self.cityName, tempEmoji, temp, feelsLike, humidity, chanceofRain),
+                title = string.format("%s %s %.1f°C (Feels like %.1f°C) 💦 %d%% ☔ %d%%",
+                                      areaName, tempEmoji, temp, feelsLike, humidity, chanceofRain),
                 fn = function()
-                    hs.urlevent.openURL(string.format("https://wttr.in/%s", hs.http.encodeForQuery(self.cityName)))
+                    if isUsingLocation then
+                        hs.urlevent.openURL(string.format("https://wttr.in/%s,%s", latitude, longitude))
+                    else
+                        hs.urlevent.openURL(string.format("https://wttr.in/%s", hs.http.encodeForQuery(self.cityName)))
+                    end
                 end,
                 tooltip = "Click to open detailed weather info"
             },
@@ -159,32 +233,40 @@ function obj:getWeather()
                 local maxEmoji = self:getTempEmoji(maxTemp)
                 local minTemp = tonumber(forecast.mintempC) or 0
                 local minEmoji = self:getTempEmoji(minTemp)
-                local desc = forecast.hourly and forecast.hourly[4] and forecast.hourly[4].weatherDesc
-                             and forecast.hourly[4].weatherDesc[1] and forecast.hourly[4].weatherDesc[1].value
-                             or "N/A"
+                local desc = forecast.hourly and
+                             forecast.hourly[4] and
+                             forecast.hourly[4].weatherDesc and
+                             forecast.hourly[4].weatherDesc[1] and
+                             forecast.hourly[4].weatherDesc[1].value or "N/A"
 
-                table.insert(menuItems, {title = string.format("%s: %s (%s %.1f°C - %s %.1f°C)", date, desc, minEmoji, minTemp, maxEmoji, maxTemp)})
+                table.insert(menuItems, {
+                    title = string.format("%s: %s (%s %.1f°C - %s %.1f°C)",
+                                          date, desc, minEmoji, minTemp, maxEmoji, maxTemp)
+                })
             end
         end
 
-        -- Update menu data
         self.menuData = menuItems
         self:updateMenubar()
     end)
 end
--- Start the Spoon's update loop
+
 function obj:start()
-    self:getWeather()
-    if self.timer then self.timer:stop() end
-    self.timer = hs.timer.doEvery(self.updateInterval, function() self:getWeather() end)
+    if self.timer then
+        self.timer:stop()
+    end
+    self.timer = hs.timer.doEvery(self.updateInterval, function()
+        self:getWeather()
+    end)
 end
 
--- Stop the Spoon's update loop
 function obj:stop()
-    if self.timer then self.timer:stop() end
+    if self.timer then
+        self.timer:stop()
+        self.timer = nil
+    end
 end
 
--- Configure the Spoon
 function obj:configure(cityName, updateInterval)
     self.cityName = cityName or self.cityName
     self.updateInterval = updateInterval or self.updateInterval
@@ -195,6 +277,21 @@ function obj:configure(cityName, updateInterval)
 
     self:stop()
     self:start()
+    self:getWeather()
+end
+
+function obj:deinit()
+    hs.location.unregister(self.locationTag)
+    self:stop()
+    if self.menubar then
+        self.menubar:delete()
+        self.menubar = nil
+    end
+    if self.locationTimeout then
+        self.locationTimeout:stop()
+        self.locationTimeout = nil
+    end
 end
 
 return obj
+ 
