@@ -1,5 +1,5 @@
--- Weather.spoon
--- A Hammerspoon Spoon to display current weather information based on macOS location.
+--- Weather.spoon
+--- A Hammerspoon Spoon to display current weather information based on macOS location.
 
 local obj = {}
 obj.__index = obj
@@ -18,65 +18,65 @@ obj.logger = hs.logger.new('Weather', 'info')
 
 -- Weather Emojis
 obj.weatherEmojis = {
-    Clear = '☀️',                                         -- Clear
-    Sunny = '🌞',                                         -- Sunny
-    ["Partly cloudy"] = '⛅',                             -- Partly cloudy
-    Cloudy = '☁️',                                        -- Cloudy
-    Overcast = '🌥️',                                     -- Overcast
-    Mist = '🌫',                                          -- Mist
-    ["Patchy rain possible"] = '🌦️',                     -- Patchy rain possible
-    ["Patchy snow possible"] = '🌨️',                     -- Patchy snow possible
-    ["Patchy sleet possible"] = '🌧️',                    -- Patchy sleet possible
-    ["Patchy freezing drizzle possible"] = '🌧',          -- Patchy freezing drizzle possible
-    ["Thundery outbreaks possible"] = '⛈️',              -- Thundery outbreaks possible
-    ["Blowing snow"] = '🌬️❄️',                           -- Blowing snow
-    Blizzard = '❄️🌪',                                    -- Blizzard
-    Fog = '🌁',                                           -- Fog
-    ["Freezing fog"] = '❄️🌫️',                           -- Freezing fog
-    ["Patchy light drizzle"] = '🌦️',                     -- Patchy light drizzle
-    ["Light drizzle"] = '🌧',                             -- Light drizzle
-    ["Freezing drizzle"] = '❄️🌧',                        -- Freezing drizzle
-    ["Heavy freezing drizzle"] = '🌧❄️',                  -- Heavy freezing drizzle
-    ["Patchy light rain"] = '🌦️',                        -- Patchy light rain
-    ["Light rain"] = '🌧',                                -- Light rain
-    ["Moderate rain at times"] = '🌦️🌧',                  -- Moderate rain at times
-    ["Moderate rain"] = '🌧',                             -- Moderate rain
-    ["Heavy rain at times"] = '🌧🌩',                      -- Heavy rain at times
-    ["Heavy rain"] = '🌧💧',                              -- Heavy rain
-    ["Light freezing rain"] = '❄️🌧',                    -- Light freezing rain
-    ["Moderate or heavy freezing rain"] = '❄️🌧💧',        -- Moderate or heavy freezing rain
-    ["Light sleet"] = '🌧❄️',                             -- Light sleet
-    ["Moderate or heavy sleet"] = '🌧❄️🌨',                -- Moderate or heavy sleet
-    ["Patchy light snow"] = '🌨',                         -- Patchy light snow
-    ["Light snow"] = '❄️',                               -- Light snow
-    ["Patchy moderate snow"] = '🌨❄️',                    -- Patchy moderate snow
-    ["Moderate snow"] = '❄️🌨',                           -- Moderate snow
-    ["Patchy heavy snow"] = '🌨❄️💨',                     -- Patchy heavy snow
-    ["Heavy snow"] = '❄️❄️',                             -- Heavy snow
-    ["Ice pellets"] = '🧊',                               -- Ice pellets
-    ["Light rain shower"] = '🌦️',                        -- Light rain shower
-    ["Moderate or heavy rain shower"] = '🌧⛈️',           -- Moderate or heavy rain shower
-    ["Torrential rain shower"] = '🌧🌊',                  -- Torrential rain shower
-    ["Light sleet showers"] = '🌨️❄️',                    -- Light sleet showers
-    ["Moderate or heavy sleet showers"] = '🌧❄️🌨',        -- Moderate or heavy sleet showers
-    ["Light snow showers"] = '🌨❄️',                      -- Light snow showers
-    ["Moderate or heavy snow showers"] = '❄️🌨💨',         -- Moderate or heavy snow showers
-    ["Patchy light rain with thunder"] = '🌦️⛈',          -- Patchy light rain with thunder
-    ["Moderate or heavy rain with thunder"] = '🌧⛈️',     -- Moderate or heavy rain with thunder
-    ["Patchy light snow with thunder"] = '❄️⚡',          -- Patchy light snow with thunder
-    ["Moderate or heavy snow with thunder"] = '❄️🌨⚡',    -- Moderate or heavy snow with thunder
-    default = '🌡️'                                       -- Default
+    Clear = '☀️', -- Clear
+    Sunny = '🌞', -- Sunny
+    ["Partly cloudy"] = '⛅', -- Partly cloudy
+    Cloudy = '☁️', -- Cloudy
+    Overcast = '🌥️', -- Overcast
+    Mist = '🌫', -- Mist
+    ["Patchy rain possible"] = '🌦️', -- Patchy rain possible
+    ["Patchy snow possible"] = '🌨️', -- Patchy snow possible
+    ["Patchy sleet possible"] = '🌧️', -- Patchy sleet possible
+    ["Patchy freezing drizzle possible"] = '🌧', -- Patchy freezing drizzle possible
+    ["Thundery outbreaks possible"] = '⛈️', -- Thundery outbreaks possible
+    ["Blowing snow"] = '🌬️❄️', -- Blowing snow
+    Blizzard = '❄️🌪', -- Blizzard
+    Fog = '🌁', -- Fog
+    ["Freezing fog"] = '❄️🌫️', -- Freezing fog
+    ["Patchy light drizzle"] = '🌦️', -- Patchy light drizzle
+    ["Light drizzle"] = '🌧', -- Light drizzle
+    ["Freezing drizzle"] = '❄️🌧', -- Freezing drizzle
+    ["Heavy freezing drizzle"] = '🌧❄️', -- Heavy freezing drizzle
+    ["Patchy light rain"] = '🌦️', -- Patchy light rain
+    ["Light rain"] = '🌧', -- Light rain
+    ["Moderate rain at times"] = '🌦️🌧', -- Moderate rain at times
+    ["Moderate rain"] = '🌧', -- Moderate rain
+    ["Heavy rain at times"] = '🌧🌩', -- Heavy rain at times
+    ["Heavy rain"] = '🌧💧', -- Heavy rain
+    ["Light freezing rain"] = '❄️🌧', -- Light freezing rain
+    ["Moderate or heavy freezing rain"] = '❄️🌧💧', -- Moderate or heavy freezing rain
+    ["Light sleet"] = '🌧❄️', -- Light sleet
+    ["Moderate or heavy sleet"] = '🌧❄️🌨', -- Moderate or heavy sleet
+    ["Patchy light snow"] = '🌨', -- Patchy light snow
+    ["Light snow"] = '❄️', -- Light snow
+    ["Patchy moderate snow"] = '🌨❄️', -- Patchy moderate snow
+    ["Moderate snow"] = '❄️🌨', -- Moderate snow
+    ["Patchy heavy snow"] = '🌨❄️💨', -- Patchy heavy snow
+    ["Heavy snow"] = '❄️❄️', -- Heavy snow
+    ["Ice pellets"] = '🧊', -- Ice pellets
+    ["Light rain shower"] = '🌦️', -- Light rain shower
+    ["Moderate or heavy rain shower"] = '🌧⛈️', -- Moderate or heavy rain shower
+    ["Torrential rain shower"] = '🌧🌊', -- Torrential rain shower
+    ["Light sleet showers"] = '🌨️❄️', -- Light sleet showers
+    ["Moderate or heavy sleet showers"] = '🌧❄️🌨', -- Moderate or heavy sleet showers
+    ["Light snow showers"] = '🌨❄️', -- Light snow showers
+    ["Moderate or heavy snow showers"] = '❄️🌨💨', -- Moderate or heavy snow showers
+    ["Patchy light rain with thunder"] = '🌦️⛈', -- Patchy light rain with thunder
+    ["Moderate or heavy rain with thunder"] = '🌧⛈️', -- Moderate or heavy rain with thunder
+    ["Patchy light snow with thunder"] = '❄️⚡', -- Patchy light snow with thunder
+    ["Moderate or heavy snow with thunder"] = '❄️🌨⚡', -- Moderate or heavy snow with thunder
+    default = '🌡️' -- Default
 }
 
 -- Temperature Emojis
 obj.tempEmojis = {
-    {threshold = 35, emoji = '🔥'},    -- Very hot
-    {threshold = 25, emoji = '🌞'},    -- Hot
-    {threshold = 15, emoji = '🌤️'},   -- Warm
-    {threshold = 5,  emoji = '☁️'},    -- Cool
-    {threshold = 0,  emoji = '❄️'},    -- Cold
-    {threshold = -10, emoji = '⛄'},   -- Very cold
-    default = '🌡️'                    -- Default emoji
+    { threshold = 35, emoji = '🔥' }, -- Very hot
+    { threshold = 25, emoji = '🌞' }, -- Hot
+    { threshold = 15, emoji = '🌤️' }, -- Warm
+    { threshold = 5, emoji = '☁️' }, -- Cool
+    { threshold = 0, emoji = '❄️' }, -- Cold
+    { threshold = -10, emoji = '⛄' }, -- Very cold
+    default = '🌡️' -- Default emoji
 }
 
 function obj:getTempEmoji(temp)
@@ -103,7 +103,7 @@ function obj:init()
         self.menubar:setTooltip('Weather Info - Waiting for location...')
     end
     self.menuData = {}
-    
+
     self.locationTag = "WeatherLocationCallback"
     hs.location.register(self.locationTag, function(location)
         if location and location.horizontalAccuracy >= 0 then
@@ -113,9 +113,9 @@ function obj:init()
             logMessage('error', 'Received invalid location data')
         end
     end)
-    
+
     hs.location.start()
-    
+
     self.locationRetryCount = 0
     self.locationMaxRetries = 5
     self.locationTimeout = hs.timer.doEvery(10, function()
@@ -132,7 +132,7 @@ function obj:init()
             self.locationTimeout:stop()
         end
     end)
-    
+
     self:start()
 end
 
@@ -146,7 +146,7 @@ function obj:getWeather()
     local urlApi
     local isUsingLocation = false
     local latitude, longitude
-    
+
     if self.currentLocation then
         latitude = string.format("%.2f", self.currentLocation.latitude)
         longitude = string.format("%.2f", self.currentLocation.longitude)
@@ -162,7 +162,13 @@ function obj:getWeather()
         self.menubar:setTitle('⌛ Fetching...')
     end
 
-    hs.http.asyncGet(urlApi, nil, function(code, body, _)
+    -- Add custom headers to ensure wttr.in returns JSON and not color-coded text or HTML:
+    local headers = {
+        ["User-Agent"] = "curl/7.64.1",
+        ["Accept"]     = "application/json"
+    }
+
+    hs.http.asyncGet(urlApi, headers, function(code, body, _)
         if code ~= 200 then
             logMessage('error', string.format('Weather API error: %d', code))
             if self.menubar then
@@ -172,9 +178,10 @@ function obj:getWeather()
             return
         end
 
-        local data = hs.json.decode(body)
-        if not data or not data.current_condition or #data.current_condition == 0 then
-            logMessage('error', 'Weather: Invalid data received')
+        -- Safely attempt JSON decode
+        local ok, data = pcall(hs.json.decode, body)
+        if not ok or not data or not data.current_condition or #data.current_condition == 0 then
+            logMessage('error', 'Weather: Invalid data received or JSON decode failed')
             if self.menubar then
                 self.menubar:setTitle('⚠️ Invalid Data')
                 self.menubar:setTooltip('Received invalid weather data')
@@ -192,11 +199,11 @@ function obj:getWeather()
         local tempEmoji = self:getTempEmoji(temp)
 
         local areaName = data.nearest_area and
-                         data.nearest_area[1] and
-                         data.nearest_area[1].areaName and
-                         data.nearest_area[1].areaName[1] and
-                         data.nearest_area[1].areaName[1].value or
-                         self.cityName
+            data.nearest_area[1] and
+            data.nearest_area[1].areaName and
+            data.nearest_area[1].areaName[1] and
+            data.nearest_area[1].areaName[1].value or
+            self.cityName
 
         if self.menubar then
             self.menubar:setTitle(string.format("%s %.1f°C", weatherEmoji, temp))
@@ -206,7 +213,7 @@ function obj:getWeather()
         local menuItems = {
             {
                 title = string.format("%s %s %.1f°C (Feels like %.1f°C) 💦 %d%% ☔ %d%%",
-                                      areaName, tempEmoji, temp, feelsLike, humidity, chanceofRain),
+                    areaName, tempEmoji, temp, feelsLike, humidity, chanceofRain),
                 fn = function()
                     if isUsingLocation then
                         hs.urlevent.openURL(string.format("https://wttr.in/%s,%s", latitude, longitude))
@@ -216,13 +223,13 @@ function obj:getWeather()
                 end,
                 tooltip = "Click to open detailed weather info"
             },
-            {title = '-'},
-            {title = "Current Weather: " .. weather},
-            {title = "Wind: " .. (current.windspeedKmph or "N/A") .. " km/h " .. (current.winddir16Point or "N/A")},
-            {title = "Pressure: " .. (current.pressure or "N/A") .. " hPa"},
-            {title = "Visibility: " .. (current.visibility or "N/A") .. " km"},
-            {title = '-'},
-            {title = "Forecast:"}
+            { title = '-' },
+            { title = "Current Weather: " .. weather },
+            { title = "Wind: " .. (current.windspeedKmph or "N/A") .. " km/h " .. (current.winddir16Point or "N/A") },
+            { title = "Pressure: " .. (current.pressure or "N/A") .. " hPa" },
+            { title = "Visibility: " .. (current.visibility or "N/A") .. " km" },
+            { title = '-' },
+            { title = "Forecast:" }
         }
 
         if data.weather then
@@ -234,14 +241,14 @@ function obj:getWeather()
                 local minTemp = tonumber(forecast.mintempC) or 0
                 local minEmoji = self:getTempEmoji(minTemp)
                 local desc = forecast.hourly and
-                             forecast.hourly[4] and
-                             forecast.hourly[4].weatherDesc and
-                             forecast.hourly[4].weatherDesc[1] and
-                             forecast.hourly[4].weatherDesc[1].value or "N/A"
+                    forecast.hourly[4] and
+                    forecast.hourly[4].weatherDesc and
+                    forecast.hourly[4].weatherDesc[1] and
+                    forecast.hourly[4].weatherDesc[1].value or "N/A"
 
                 table.insert(menuItems, {
                     title = string.format("%s: %s (%s %.1f°C - %s %.1f°C)",
-                                          date, desc, minEmoji, minTemp, maxEmoji, maxTemp)
+                        date, desc, minEmoji, minTemp, maxEmoji, maxTemp)
                 })
             end
         end
@@ -271,7 +278,7 @@ function obj:configure(cityName, updateInterval)
     self.cityName = cityName or self.cityName
     self.updateInterval = updateInterval or self.updateInterval
 
-    for k, v in pairs({cityName = self.cityName, updateInterval = self.updateInterval}) do
+    for k, v in pairs({ cityName = self.cityName, updateInterval = self.updateInterval }) do
         hs.settings.set("Weather_" .. k, v)
     end
 
@@ -294,4 +301,4 @@ function obj:deinit()
 end
 
 return obj
- 
+
